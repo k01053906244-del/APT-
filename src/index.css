@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans KR", "Inter", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: #131313;
+  color: #e5e2e1;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom gorgeous thin dark scrollbar for bento cards and modals */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(30, 30, 30, 0.4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 202, 80, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 202, 80, 0.4);
+}
+

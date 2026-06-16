@@ -1,0 +1,6 @@
+{
+  "name": "아파트입주&투자플랜 - 뷰빈",
+  "description": "수원 매교역 팰루시드 등 신축아파트 입주 예정자를 위한 프리미엄 레버리지 계산 및 입지/시장 분석 플래너",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
