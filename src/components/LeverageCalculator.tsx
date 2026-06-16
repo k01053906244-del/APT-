@@ -79,6 +79,15 @@ export default function LeverageCalculator() {
     }
   });       // 예상 대출 금리 (5.0%)
 
+  const [loanTerm, setLoanTerm] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('byubin_loan_term');
+      return saved ? Number(saved) : 30;
+    } catch {
+      return 30;
+    }
+  });       // 대출 상환 기간 (15, 30, 40년 등)
+
   const [conversionRate, setConversionRate] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('byubin_conversion_rate');
@@ -129,6 +138,14 @@ export default function LeverageCalculator() {
       console.warn('LocalStorage save failed:', e);
     }
   }, [interestRate]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('byubin_loan_term', loanTerm.toString());
+    } catch (e) {
+      console.warn('LocalStorage save failed:', e);
+    }
+  }, [loanTerm]);
 
   useEffect(() => {
     try {
@@ -340,6 +357,7 @@ export default function LeverageCalculator() {
       'byubin_initial_loan',
       'byubin_market_jeonse',
       'byubin_interest_rate',
+      'byubin_loan_term',
       'byubin_conversion_rate',
       'byubin_target_rent',
       'byubin_lock_deposit',
@@ -461,9 +479,12 @@ export default function LeverageCalculator() {
     // B. 보증금 상환 후 잔여 대출금
     const remainingLoan = Math.max(0, initialLoan - depositValue);
     
-    // C. 매월 주단보수 원리금 균등상환액 계산 (30년 / 360개월 기준)
+    // B-2. 실투자금 (필요 현금)
+    const actualCashNeeded = Math.max(0, totalNeededCapital - initialLoan - depositValue);
+    
+    // C. 매월 주단보수 원리금 균등상환액 계산
     const r = interestRate / 12 / 100;
-    const n = 360;
+    const n = loanTerm * 12;
     let monthlyAmortization = 0;
     if (remainingLoan > 0 && r > 0) {
       monthlyAmortization = Math.round(
@@ -489,6 +510,7 @@ export default function LeverageCalculator() {
 
     return {
       depositValue,
+      actualCashNeeded,
       remainingLoan,
       monthlyAmortization,
       monthlyPureInterest,
@@ -499,7 +521,7 @@ export default function LeverageCalculator() {
       repaymentRatio,
       principalPercent
     };
-  }, [initialLoan, myCash, marketJeonse, interestRate, conversionRate, targetRent]);
+  }, [initialLoan, myCash, marketJeonse, interestRate, conversionRate, targetRent, totalNeededCapital, loanTerm]);
 
   const isPositiveFlow = metrics.netCashFlow >= 0;
 
@@ -1234,6 +1256,32 @@ export default function LeverageCalculator() {
                   </span>
                   <span>7.0%</span>
                 </div>
+                {/* 대출 기간 선택 */}
+                <div className="pt-3 border-t border-zinc-800/50 mt-1 flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-300">대출 상환 기간</span>
+                  <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+                    {[15, 30, 40, 50].map((term) => (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => {
+                          if (isInterestUnlocked) {
+                            setLoanTerm(term);
+                            playClickSound();
+                          }
+                        }}
+                        disabled={!isInterestUnlocked}
+                        className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${
+                          loanTerm === term 
+                            ? 'bg-rose-500 text-white shadow-[0_0_8px_rgba(243,24,96,0.4)]' 
+                            : 'text-zinc-500 hover:text-zinc-300'
+                        } ${!isInterestUnlocked && loanTerm !== term ? 'opacity-30 cursor-not-allowed' : ''}`}
+                      >
+                        {term}년
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* B. 시장 전월세 전환율 - 개별 영역 독립 테두리 박스 */}
@@ -1815,14 +1863,15 @@ export default function LeverageCalculator() {
 
       {/* Main Output KPIs Row */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* KPI 1: 시장에 내놓을 보증금 */}
-        <div className="bg-[#1e1e1e]/60 border border-white/5 p-5 rounded-2xl flex flex-col justify-between">
-          <div>
-            <p className="text-xs text-slate-400 font-medium mb-1">시장에 내놓을 보증금</p>
-            <h4 className="text-base sm:text-lg font-black text-white">{formatKRW(metrics.depositValue)}</h4>
+        {/* KPI 1: 실투자금 (필요 현금) */}
+        <div className="bg-[#1e1e1e]/60 border border-rose-500/30 p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group shadow-[0_0_15px_rgba(243,24,96,0.1)] hover:border-rose-500/60 transition-all">
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-all"></div>
+          <div className="relative z-10">
+            <p className="text-xs text-rose-400 font-bold mb-1 tracking-tight">실투자금 (당장 필요한 현금)</p>
+            <h4 className="text-base sm:text-lg font-black text-white drop-shadow-md">{formatKRW(metrics.actualCashNeeded)}</h4>
           </div>
-          <div className="h-1.5 w-full bg-zinc-800 mt-4 rounded-full overflow-hidden">
-            <div className="h-full bg-[#f2ca50] transition-all duration-300 animate-pulse" style={{ width: `${metrics.depositBarPercentage}%` }}></div>
+          <div className="h-1.5 w-full bg-zinc-800 mt-4 rounded-full overflow-hidden relative z-10">
+            <div className="h-full bg-rose-500 transition-all duration-500" style={{ width: `${Math.min(100, (metrics.actualCashNeeded / totalNeededCapital) * 100)}%` }}></div>
           </div>
         </div>
 
