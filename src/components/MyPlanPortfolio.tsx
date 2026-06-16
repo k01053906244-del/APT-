@@ -21,11 +21,13 @@ import {
   Info,
   CheckCircle2,
   FileText,
-  Lock,
-  Unlock,
-  AlertTriangle
+  Lock, 
+  Unlock, 
+  AlertTriangle 
 } from 'lucide-react';
 import { playIgniteSound } from '../utils/audio';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../utils/firebase';
 
 interface MyPlanPortfolioProps {
   isOpen: boolean;
@@ -532,9 +534,25 @@ export default function MyPlanPortfolio({ isOpen, onClose, onShowToast }: MyPlan
                         </div>
 
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             playIgniteSound();
                             setIsGenerating(true);
+                            
+                            try {
+                              await addDoc(collection(db, 'savedPlans'), {
+                                aptName: aptName,
+                                totalNeededCapital: estimatedPrice,
+                                initialLoan: initialLoan,
+                                marketJeonse: marketJeonse,
+                                interestRate: interestRate,
+                                conversionRate: conversionRate,
+                                targetRent: targetRent,
+                                createdAt: new Date().toISOString()
+                              });
+                            } catch (e) {
+                              console.error("Error saving plan to Firebase: ", e);
+                            }
+
                             setTimeout(() => {
                               setIsGenerating(false);
                               setIsReportGenerated(true);
@@ -542,7 +560,7 @@ export default function MyPlanPortfolio({ isOpen, onClose, onShowToast }: MyPlan
                                 localStorage.setItem('byubin_flame_quenched', 'true');
                                 window.dispatchEvent(new CustomEvent('byubin_flame_quenched_updated'));
                               } catch {}
-                              onShowToast('📂 수원 매교역 팰루시드 맞춤형 실전 자금조달 스토리 보고서가 성공적으로 빌드되었습니다.');
+                              onShowToast('📂 플랜이 DB에 성공적으로 저장되고 보고서가 열렸습니다.');
                             }, 1200);
                           }}
                           className="w-full bg-[#f2ca50] hover:bg-[#e4bc3c] text-zinc-950 font-black p-3.5 rounded-lg text-xs transition-all flex justify-center items-center gap-1.5 cursor-pointer shadow-md active:scale-95 duration-100"

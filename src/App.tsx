@@ -24,6 +24,7 @@ import ProductAnalysis from './components/ProductAnalysis';
 import InvestmentAnalysis from './components/InvestmentAnalysis';
 import KnowledgeModal from './components/KnowledgeModal';
 import MyPlanPortfolio from './components/MyPlanPortfolio';
+import SavedPlansModal from './components/SavedPlansModal';
 import { playClickSound, playIgniteSound } from './utils/audio';
 
 type AppTab = 'calculator' | 'masterplan' | 'notes' | 'market' | 'location' | 'product' | 'investment';
@@ -37,6 +38,7 @@ export default function App() {
   const [activeTab, setActiveTab ] = useState<AppTab>('calculator');
   const [modalKey, setModalKey] = useState<string | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const [isSavedPlansOpen, setIsSavedPlansOpen] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastAlert[]>([]);
   const [isFullyLocked, setIsFullyLocked] = useState<boolean>(false);
   const [isFlameQuenched, setIsFlameQuenched] = useState<boolean>(() => {
@@ -148,57 +150,70 @@ export default function App() {
             </div>
           </div>
           
-          {/* Premium Gold-Glowing Glassmorphism Portfolio Gate Button */}
-          <button 
-            onClick={() => {
-              if (isFullyLocked && !isFlameQuenched) {
-                playIgniteSound();
-              } else {
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
                 playClickSound();
-              }
-              setIsProfileOpen(true);
-              try {
-                localStorage.setItem('byubin_flame_quenched', 'true');
-                window.dispatchEvent(new CustomEvent('byubin_flame_quenched_updated'));
-              } catch {}
-            }}
-            className={`relative backdrop-blur-md px-3.5 py-2.5 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black flex items-center gap-1.5 sm:gap-2 active:scale-95 duration-300 cursor-pointer select-none group/portfolio overflow-hidden transition-all ${
-              (isFullyLocked && !isFlameQuenched)
-                ? 'bg-gradient-to-r from-[#ff3c00] via-[#fc4100] to-[#f2ca50] border-2 border-yellow-300 text-white shadow-[0_0_25px_rgba(255,60,0,0.8)] hover:shadow-[0_0_40px_rgba(255,60,0,1)] hover:scale-103 scale-102 ring-2 ring-orange-550/30'
-                : 'bg-gradient-to-r from-amber-500/10 via-[#f2ca50]/15 to-amber-500/10 hover:from-amber-500/20 hover:via-[#f2ca50]/35 hover:to-[#f2ca50]/10 text-[#f2ca50] border border-[#f2ca50]/45 hover:border-[#f2ca50] shadow-[0_0_15px_-4px_rgba(242,202,80,0.25)] hover:shadow-[0_0_22px_-2px_rgba(242,202,80,0.45)]'
-            }`}
-            title="나의 입주플랜 포트폴리오 세팅 및 마스터플랜 확인"
-          >
-            {/* Elegant glass reflect shine swipe keyframe effect over container */}
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/portfolio:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-
-            {/* Ignited fire sparks decoration */}
-            {(isFullyLocked && !isFlameQuenched) && (
-              <span className="absolute inset-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom,rgba(255,230,0,0.45),transparent)] animate-pulse pointer-events-none" />
-            )}
-
-            {(isFullyLocked && !isFlameQuenched) ? (
-              <Flame className="w-4 h-4 text-white animate-bounce group-hover/portfolio:scale-125 transition-transform shrink-0" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5 text-[#f2ca50] group-hover/portfolio:scale-110 group-hover/portfolio:rotate-12 transition-transform duration-300 shrink-0" />
-            )}
+                setIsSavedPlansOpen(true);
+              }}
+              className="px-3 py-2.5 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black flex items-center gap-1.5 bg-zinc-800/80 border border-zinc-700 text-slate-300 hover:bg-zinc-700 hover:text-white transition-all cursor-pointer shadow-md active:scale-95"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">저장된 플랜</span> 불러오기
+            </button>
             
-            {(isFullyLocked && !isFlameQuenched) ? (
-              <span className="font-extrabold tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] animate-pulse">
-                🔥 이글이글 플랜 확인하기
-              </span>
-            ) : (
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#fffbf0] via-[#f2ca50] to-[#e4bc3c] font-black tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
-                내 플랜 확인하기
-              </span>
-            )}
+            {/* Premium Gold-Glowing Glassmorphism Portfolio Gate Button */}
+            <button 
+              onClick={() => {
+                if (isFullyLocked && !isFlameQuenched) {
+                  playIgniteSound();
+                } else {
+                  playClickSound();
+                }
+                setIsProfileOpen(true);
+                try {
+                  localStorage.setItem('byubin_flame_quenched', 'true');
+                  window.dispatchEvent(new CustomEvent('byubin_flame_quenched_updated'));
+                } catch {}
+              }}
+              className={`relative backdrop-blur-md px-3.5 py-2.5 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black flex items-center gap-1.5 sm:gap-2 active:scale-95 duration-300 cursor-pointer select-none group/portfolio overflow-hidden transition-all ${
+                (isFullyLocked && !isFlameQuenched)
+                  ? 'bg-gradient-to-r from-[#ff3c00] via-[#fc4100] to-[#f2ca50] border-2 border-yellow-300 text-white shadow-[0_0_25px_rgba(255,60,0,0.8)] hover:shadow-[0_0_40px_rgba(255,60,0,1)] hover:scale-103 scale-102 ring-2 ring-orange-550/30'
+                  : 'bg-gradient-to-r from-amber-500/10 via-[#f2ca50]/15 to-amber-500/10 hover:from-amber-500/20 hover:via-[#f2ca50]/35 hover:to-[#f2ca50]/10 text-[#f2ca50] border border-[#f2ca50]/45 hover:border-[#f2ca50] shadow-[0_0_15px_-4px_rgba(242,202,80,0.25)] hover:shadow-[0_0_22px_-2px_rgba(242,202,80,0.45)]'
+              }`}
+              title="나의 입주플랜 포트폴리오 세팅 및 마스터플랜 확인"
+            >
+              {/* Elegant glass reflect shine swipe keyframe effect over container */}
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/portfolio:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
 
-            {/* Glowing critical status alert beacon */}
-            <span className="flex h-1.5 w-1.5 shrink-0 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${(isFullyLocked && !isFlameQuenched) ? 'bg-white' : 'bg-[#f2ca50]'}`}></span>
-              <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${(isFullyLocked && !isFlameQuenched) ? 'bg-white' : 'bg-[#f2ca50]'}`}></span>
-            </span>
-          </button>
+              {/* Ignited fire sparks decoration */}
+              {(isFullyLocked && !isFlameQuenched) && (
+                <span className="absolute inset-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom,rgba(255,230,0,0.45),transparent)] animate-pulse pointer-events-none" />
+              )}
+
+              {(isFullyLocked && !isFlameQuenched) ? (
+                <Flame className="w-4 h-4 text-white animate-bounce group-hover/portfolio:scale-125 transition-transform shrink-0" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5 text-[#f2ca50] group-hover/portfolio:scale-110 group-hover/portfolio:rotate-12 transition-transform duration-300 shrink-0" />
+              )}
+              
+              {(isFullyLocked && !isFlameQuenched) ? (
+                <span className="font-extrabold tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] animate-pulse">
+                  🔥 이글이글 플랜 확인하기
+                </span>
+              ) : (
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#fffbf0] via-[#f2ca50] to-[#e4bc3c] font-black tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+                  내 플랜 확인하기
+                </span>
+              )}
+
+              {/* Glowing critical status alert beacon */}
+              <span className="flex h-1.5 w-1.5 shrink-0 relative">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${(isFullyLocked && !isFlameQuenched) ? 'bg-white' : 'bg-[#f2ca50]'}`}></span>
+                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${(isFullyLocked && !isFlameQuenched) ? 'bg-white' : 'bg-[#f2ca50]'}`}></span>
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Primary 3-Tab Header Array */}
@@ -384,6 +399,13 @@ export default function App() {
       <MyPlanPortfolio 
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        onShowToast={handleShowToast}
+      />
+
+      {/* Saved Plans Archive Modal */}
+      <SavedPlansModal
+        isOpen={isSavedPlansOpen}
+        onClose={() => setIsSavedPlansOpen(false)}
         onShowToast={handleShowToast}
       />
 

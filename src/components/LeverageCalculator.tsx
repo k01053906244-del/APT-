@@ -7,9 +7,10 @@ import pellucidHero from '../pellucid-hero.jpeg';
 export default function LeverageCalculator() {
   const [aptName, setAptName] = useState<string>(() => {
     try {
-      return localStorage.getItem('byubin_apt_name') || '신축 아파트';
+      const stored = localStorage.getItem('byubin_apt_name');
+      return (stored && stored !== '신축 아파트' && stored !== '신축아파트') ? stored : '';
     } catch {
-      return '신축 아파트';
+      return '';
     }
   });
 
@@ -27,10 +28,10 @@ export default function LeverageCalculator() {
     const handleAptNameSync = (e: Event) => {
       const customEvent = e as CustomEvent<string>;
       if (customEvent.detail !== undefined) {
-        setAptName(customEvent.detail || '신축 아파트');
+        setAptName(customEvent.detail || '');
       } else {
         const savedApt = localStorage.getItem('byubin_apt_name');
-        setAptName(savedApt || '신축 아파트');
+        setAptName(savedApt || '');
       }
     };
     window.addEventListener('byubin_apt_name_updated', handleAptNameSync);
@@ -312,6 +313,50 @@ export default function LeverageCalculator() {
   const [activeEdit, setActiveEdit] = useState<string | null>(null);
   const [rawInputValue, setRawInputValue] = useState<string>('');
 
+  const handleResetPlan = () => {
+    playClickSound();
+    
+    // Reset states
+    setAptName('');
+    setTotalNeededCapital(800000000);
+    setInitialLoan(430000000);
+    setMarketJeonse(400000000);
+    setInterestRate(5.0);
+    setConversionRate(6.0);
+    setTargetRent(1500000);
+    
+    // Reset locks
+    setIsDepositUnlocked(true);
+    setIsInterestUnlocked(true);
+    setIsConversionUnlocked(true);
+    setIsTotalCapitalUnlocked(true);
+    setIsInitialLoanUnlocked(true);
+    setIsMarketJeonseUnlocked(true);
+    
+    // Clear localStorage
+    const keysToRemove = [
+      'byubin_apt_name',
+      'byubin_total_capital',
+      'byubin_initial_loan',
+      'byubin_market_jeonse',
+      'byubin_interest_rate',
+      'byubin_conversion_rate',
+      'byubin_target_rent',
+      'byubin_lock_deposit',
+      'byubin_lock_interest',
+      'byubin_lock_conversion',
+      'byubin_lock_total_capital',
+      'byubin_lock_initial_loan',
+      'byubin_lock_market_jeonse',
+      'byubin_flame_quenched'
+    ];
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    setIsFlameQuenched(false);
+    
+    window.dispatchEvent(new Event('byubin_locks_updated'));
+  };
+
   const startEdit = (field: string, initialNum: number) => {
     setActiveEdit(field);
     setRawInputValue(initialNum.toString());
@@ -483,54 +528,39 @@ export default function LeverageCalculator() {
           style={{ filter: "brightness(0.6) contrast(1.02) saturate(1.05)" }}
         />
         {/* Subtle dark overlay */}
-        <div className="absolute inset-0 bg-black/45 pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-black/10 pointer-events-none z-10" />
         
-        {/* Centered Content Block */}
-        <div className="relative z-30 w-full max-w-sm sm:max-w-md text-center flex flex-col items-center gap-4">
-          <div className="space-y-1 sm:space-y-2 pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#f2ca50] bg-black/60 px-2.5 py-1 rounded-full border border-[#f2ca50]/20 font-black">
-              PREMIUM REAL ESTATE PLANNERS
-            </span>
-            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              AI 신축아파트 입주 & 투자분석기
-            </h2>
-            <p className="text-slate-300 text-[10px] sm:text-xs font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-              나만의 최적 레버리지 시뮬레이션 및 포트폴리오 빌더
-            </p>
-          </div>
-
+        {/* Top Content Block */}
+        <div className="absolute top-6 left-0 w-full z-30 flex justify-start px-4 gap-2">
           {!isEditingName ? (
             <button
               onClick={() => {
                 playClickSound();
                 setIsEditingName(true);
               }}
-              className="w-full relative overflow-hidden backdrop-blur-md bg-black/70 border-2 border-[#f2ca50] text-[#f2ca50] hover:text-white px-6 py-4 rounded-2xl text-xs sm:text-sm font-extrabold shadow-[0_0_25px_rgba(242,202,80,0.35)] hover:shadow-[0_0_40px_rgba(242,202,80,0.85),inset_0_0_15px_rgba(242,202,80,0.4)] scale-100 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer group/glow-btn"
+              className="w-48 sm:w-64 backdrop-blur-md bg-black/50 border border-[#f2ca50] text-[#f2ca50] hover:text-white py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_15px_rgba(242,202,80,0.25)] hover:shadow-[0_0_25px_rgba(242,202,80,0.5)] scale-100 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center cursor-pointer"
             >
-              {/* Golden sweeping light effect */}
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-[#f2ca50]/20 to-transparent -translate-x-full group-hover/glow-btn:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-              
-              {/* Gold pulsating background glow */}
-              <span className="absolute inset-0 bg-gradient-to-r from-orange-600/10 via-[#f2ca50]/20 to-orange-600/10 animate-pulse pointer-events-none" />
-
-              <Flame className="w-4.5 h-4.5 text-[#f2ca50] animate-bounce shrink-0 group-hover/glow-btn:scale-125 transition-transform" />
               <span className="font-extrabold text-[#f2ca50] tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                분석대상: {aptName || '입력하기'}
-              </span>
-              <span className="text-[10px] text-slate-300 font-extrabold bg-[#f2ca50]/25 border border-[#f2ca50]/40 px-2 py-0.5 rounded-full uppercase tracking-tight shrink-0 ml-1">
-                변경
+                분석대상: {aptName && aptName !== '신축 아파트' && aptName !== '신축아파트' ? aptName : ''}
               </span>
             </button>
           ) : (
             <div
-              className="w-full bg-black/95 backdrop-blur-xl border-2 border-[#f2ca50] rounded-2xl p-1.5 flex items-center gap-2 shadow-[0_0_35px_rgba(0,0,0,0.95)]"
+              className="w-full max-w-xs bg-black/70 backdrop-blur-md border border-[#f2ca50] rounded-full p-1.5 flex items-center gap-2 shadow-xl"
             >
+              <button
+                onClick={handleResetPlan}
+                className="h-8 px-3 rounded-full bg-slate-700/50 hover:bg-slate-600 flex items-center justify-center text-white transition-colors text-xs font-bold whitespace-nowrap"
+                title="새 플랜 시작하기 (초기화)"
+              >
+                🔄 초기화
+              </button>
               <input 
                 type="text"
                 value={aptName}
                 onChange={(e) => handleAptNameChange(e.target.value)}
-                placeholder="분석할 아파트명을 입력하세요"
-                className="bg-transparent text-white font-extrabold text-xs sm:text-sm outline-none flex-1 pl-3.5 placeholder-slate-500"
+                placeholder="분석대상"
+                className="bg-transparent text-white font-extrabold text-xs sm:text-sm outline-none flex-1 pl-2 placeholder-slate-400"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -544,7 +574,7 @@ export default function LeverageCalculator() {
                   playClickSound();
                   setIsEditingName(false);
                 }}
-                className="bg-[#f2ca50] text-[#3c2f00] hover:bg-white transition-colors p-2 px-3.5 rounded-xl text-xs font-black active:scale-95 duration-150 cursor-pointer"
+                className="bg-[#f2ca50] text-[#3c2f00] hover:bg-white transition-colors py-1.5 px-4 rounded-full text-xs font-black active:scale-95 duration-150 cursor-pointer"
               >
                 확인
               </button>
