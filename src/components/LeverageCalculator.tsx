@@ -531,10 +531,10 @@ export default function LeverageCalculator() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.3 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
       className="space-y-8"
       id="calculator-tab-container"
     >
@@ -547,10 +547,9 @@ export default function LeverageCalculator() {
           src={pellucidHero} 
           alt="수원 매교역 팰루시드 아파트 완성 투시도"
           className="absolute inset-0 w-full h-full object-cover object-[center_70%] pointer-events-none z-0"
-          style={{ filter: "brightness(0.6) contrast(1.02) saturate(1.05)" }}
+          style={{ filter: "brightness(1) contrast(1.02) saturate(1.05)" }}
         />
-        {/* Subtle dark overlay */}
-        <div className="absolute inset-0 bg-black/10 pointer-events-none z-10" />
+        {/* 다크 오버레이 완전 제거 */}
         
         {/* Top Content Block */}
         <div className="absolute top-6 left-0 w-full z-30 flex justify-start px-4 gap-2">
@@ -560,9 +559,9 @@ export default function LeverageCalculator() {
                 playClickSound();
                 setIsEditingName(true);
               }}
-              className="w-48 sm:w-64 backdrop-blur-md bg-black/50 border border-[#f2ca50] text-[#f2ca50] hover:text-white py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_0_15px_rgba(242,202,80,0.25)] hover:shadow-[0_0_25px_rgba(242,202,80,0.5)] scale-100 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center cursor-pointer"
+              className="w-48 sm:w-64 backdrop-blur-lg bg-white/60 border border-white/40 text-slate-800 hover:bg-white/80 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-[0_4px_20px_rgba(0,0,0,0.15)] scale-100 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center cursor-pointer"
             >
-              <span className="font-extrabold text-[#f2ca50] tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              <span className="font-extrabold text-slate-900 tracking-tight">
                 분석대상: {aptName && aptName !== '신축 아파트' && aptName !== '신축아파트' ? aptName : ''}
               </span>
             </button>
@@ -608,7 +607,9 @@ export default function LeverageCalculator() {
       {/* Bento Grid Input Controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Control Card: Investment Setup */}
-        <div className="bg-[#1e1e1e]/60 backdrop-blur-md border border-white/5 p-6 rounded-2xl flex flex-col justify-between space-y-6">
+        <div className="bg-[#1e1e1e]/60 backdrop-blur-md border border-[#f2ca50]/20 p-6 rounded-2xl flex flex-col justify-between space-y-6 shadow-lg relative overflow-hidden group">
+          {/* Subtle outer glow border effect on hover */}
+          <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#f2ca50]/30 rounded-2xl transition-colors duration-500 pointer-events-none" />
           <div className="space-y-6">
             <h3 className="text-base sm:text-lg font-bold text-[#f2ca50] flex items-center gap-2">
               <Landmark className="w-5 h-5 text-[#f2ca50]" />
@@ -1101,8 +1102,10 @@ export default function LeverageCalculator() {
           </div>
         </div>
 
-        {/* Right Control Card: Rate Setting & Target Rent */}
-        <div className="bg-[#1e1e1e]/60 backdrop-blur-md border border-white/5 p-6 rounded-2xl flex flex-col justify-between space-y-6">
+        {/* Right Control Card: Market Strategy & Conversion */}
+        <div className="bg-[#1e1e1e]/60 backdrop-blur-md border border-[#f2ca50]/20 p-6 rounded-2xl flex flex-col justify-between space-y-6 shadow-lg relative overflow-hidden group">
+          {/* Subtle outer glow border effect on hover */}
+          <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#f2ca50]/30 rounded-2xl transition-colors duration-500 pointer-events-none" />
           <div className="space-y-6">
             <h3 className="text-base sm:text-lg font-bold text-[#f2ca50] flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-[#f2ca50]" />
@@ -1867,7 +1870,10 @@ export default function LeverageCalculator() {
         <div className="bg-[#1e1e1e]/60 border border-rose-500/30 p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group shadow-[0_0_15px_rgba(243,24,96,0.1)] hover:border-rose-500/60 transition-all">
           <div className="absolute -right-4 -top-4 w-20 h-20 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-all"></div>
           <div className="relative z-10">
-            <p className="text-xs text-rose-400 font-bold mb-1 tracking-tight">실투자금 (당장 필요한 현금)</p>
+            <div className="flex flex-col gap-1 mb-1.5">
+              <p className="text-xs text-rose-400 font-bold tracking-tight">실투자금 (당장 필요한 현금)</p>
+              <p className="text-[10px] text-rose-400/70 font-sans break-keep font-medium">실질투입금액 = [총필요자금] - [주담대] - [보증금]</p>
+            </div>
             <h4 className="text-base sm:text-lg font-black text-white drop-shadow-md">{formatKRW(metrics.actualCashNeeded)}</h4>
           </div>
           <div className="h-1.5 w-full bg-zinc-800 mt-4 rounded-full overflow-hidden relative z-10">

@@ -474,125 +474,50 @@ export default function MyPlanPortfolio({ isOpen, onClose, onShowToast }: MyPlan
                 );
               }
 
-              // Gate 2: Confirmation Screen
-              if (!isReportGenerated) {
-                return (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="py-12 max-w-md mx-auto text-center space-y-6"
-                  >
-                    {isGenerating ? (
-                      <div className="space-y-4">
-                        <div className="relative w-14 h-14 mx-auto">
-                          <div className="absolute inset-x-0 inset-y-0 border-4 border-zinc-800 rounded-full" />
-                          <div className="absolute inset-x-0 inset-y-0 border-4 border-t-[#f2ca50] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
-                        </div>
-                        <p className="text-xs sm:text-sm font-black text-white">
-                          수원 매교역 팰루시드 마스터플랜 보고서 고밀도 설계 중...
-                        </p>
-                        <p className="text-[10px] sm:text-xs text-slate-400 font-semibold max-w-xs mx-auto">
-                          대표님께서 기어 조정을 마치고 잠금 설정하신 주택 가치평가 및 대출 상환이율 데이터 세트를 실시간 교차 대칭 분석하여 보고서 스토리를 빌드하고 있습니다.
-                        </p>
-                        <div className="w-full bg-zinc-800 rounded-full h-1 max-w-[200px] mx-auto overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: "100%" }}
-                            transition={{ duration: 1.2 }}
-                            className="bg-[#f2ca50] h-full"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-5 text-center">
-                        <div className="bg-[#f2ca50]/10 border border-[#f2ca50]/30 p-4 rounded-full w-14 h-14 flex items-center justify-center mx-auto text-[#f2ca50]">
-                          <ShieldCheck className="w-7 h-7" />
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="text-base sm:text-lg font-black text-white tracking-tight">수원 매교역 팰루시드 가치평가 고정완료</h3>
-                          <p className="text-xs text-slate-400 font-bold px-4">
-                            축하합니다! 모든 금융 설계 데이터 세트가 완벽하게 안전고정(🔒) 상태로 지정되었습니다.
-                          </p>
-                          <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 max-w-sm mx-auto text-left space-y-2.5 mt-4">
-                            <div className="flex justify-between text-[11px] font-bold">
-                              <span className="text-slate-500">분석 아파트 단지명</span>
-                              <span className="text-white font-black">{aptName}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-bold">
-                              <span className="text-slate-500">인수용 총 필요자금</span>
-                              <span className="text-[#f2ca50] font-black">{formatExactDraftWon(estimatedPrice)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-bold">
-                              <span className="text-slate-500">은행 신청 초기 대출</span>
-                              <span className="text-sky-450 font-black">{formatExactDraftWon(initialLoan)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-bold">
-                              <span className="text-slate-500">실 세입자 예상보증금</span>
-                              <span className="text-emerald-400 font-bold">{formatExactDraftWon(depositValue)}</span>
-                            </div>
-                          </div>
-                        </div>
+              // Gate 2 removed: Directly render the full dynamic story narrative when all locked
+              
+              const handleCopyStory = () => {
+                const storyText = `💡 자금 흐름 요약
 
-                        <button
-                          onClick={async () => {
-                            playIgniteSound();
-                            setIsGenerating(true);
-                            
-                            try {
-                              await addDoc(collection(db, 'savedPlans'), {
-                                aptName: aptName,
-                                totalNeededCapital: estimatedPrice,
-                                initialLoan: initialLoan,
-                                marketJeonse: marketJeonse,
-                                interestRate: interestRate,
-                                conversionRate: conversionRate,
-                                targetRent: targetRent,
-                                createdAt: new Date().toISOString()
-                              });
-                            } catch (e) {
-                              console.error("Error saving plan to Firebase: ", e);
-                            }
+1단계: 부동산 매수
+* 총 필요자금: ${formatExactDraftWon(estimatedPrice)} (매매가 및 제반비용 포함)
 
-                            setTimeout(() => {
-                              setIsGenerating(false);
-                              setIsReportGenerated(true);
-                              try {
-                                localStorage.setItem('byubin_flame_quenched', 'true');
-                                window.dispatchEvent(new CustomEvent('byubin_flame_quenched_updated'));
-                              } catch {}
-                              onShowToast('📂 플랜이 DB에 성공적으로 저장되고 보고서가 열렸습니다.');
-                            }, 1200);
-                          }}
-                          className="w-full bg-[#f2ca50] hover:bg-[#e4bc3c] text-zinc-950 font-black p-3.5 rounded-lg text-xs transition-all flex justify-center items-center gap-1.5 cursor-pointer shadow-md active:scale-95 duration-100"
-                        >
-                          <Sparkles className="w-4 h-4 text-zinc-950" />
-                          확인하기 및 플랜 보고서 작성 개봉
-                        </button>
+2단계: 타인 자본(레버리지) 활용
+* 주택담보대출: ${formatExactDraftWon(initialLoan)} 실행
+  (금리: ${amortizationYears}년 만기 ${interestRate.toFixed(1)}% 적용 기준)
+* 세입자 보증금: ${formatExactDraftWon(depositValue)} 확보 (반전세: 보증금 ${formatExactDraftWon(depositValue)} / 월세 ${formatExactDraftWon(targetRent)})
+  (현재 예상 전세가: ${formatExactDraftWon(marketJeonse)} / 전환율 ${conversionRate.toFixed(1)}% 적용)
+* ▶ 타인 자본 합계: ${formatExactDraftWon(initialLoan + depositValue)}
 
-                        <p className="text-[10px] text-slate-500 font-bold">
-                          위 [확인하기] 버튼을 누르면 스토리라인 중심의 대표님 전용 설명서가 아래로 쫘악 펼쳐집니다.
-                        </p>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              }
+3단계: 내 순수 투자금
+* 총 필요자금에서 대출과 보증금을 제외하고, 당장 내 주머니에서 꺼내야 할 실제 현금은 ${formatExactDraftWon(myCash)}입니다.
 
-              // Case 3: Confirmed & Locked! Render full dynamic story narrative with stagger entrance
+4단계: 매월 현금 흐름 (대출 상환 vs 월세 수익)
+* 지출 (은행): 매월 원금과 이자로 약 ${formatExactDraftWon(monthlyAmortizationPayment)}을 상환합니다.
+* 수입 (세입자): 세입자로부터 매월 ${formatExactDraftWon(targetRent)}의 월세를 받습니다.
+* 최종 흐름: ${netCashFlow >= 0 ? `세입자에게 받는 월세만으로 대출 이자를 납부하고도, 매월 ${formatExactDraftWon(netCashFlow)}이 남습니다.` : `월세 수입을 대출 이자에 보태어, 매월 ${formatExactDraftWon(Math.abs(netCashFlow))}의 현금을 추가로 부담합니다.`}`;
+
+                navigator.clipboard.writeText(storyText).then(() => {
+                  onShowToast('📋 클립보드에 복사되었습니다! 카톡이나 메모장에 붙여넣기 해보세요.');
+                }).catch(() => {
+                  onShowToast('복사에 실패했습니다. 권한을 확인해주세요.');
+                });
+              };
+
               return (
                 <div className="space-y-6">
                   {/* Recalculate Alert / Top Quick Indicator */}
                   <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-xl px-4 py-3 text-left flex justify-between items-center text-xs">
                     <span className="text-emerald-400 font-bold flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      수원 매교역 팰루시드 정밀 고정 리포트 성립완료 (작동 중)
+                      {aptName} 정밀 고정 리포트 성립완료 (작동 중)
                     </span>
                     <span className="text-[10px] text-slate-400 font-bold text-right hidden sm:inline">
                       수치를 재조정하려면 메인 화면에서 잠금(열쇠)을 해제하십시오
                     </span>
                   </div>
 
-                  {/* 1. 첫 출발: 내 집 마련을 위한 총비용과 대출 */}
+                  {/* 1단계: 부동산 매수 */}
                   <motion.div 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -602,23 +527,17 @@ export default function MyPlanPortfolio({ isOpen, onClose, onShowToast }: MyPlan
                     <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-[#f2ca50]/5 to-transparent rounded-full pointer-events-none" />
                     <div className="flex items-center gap-2.5 pb-2 border-b border-zinc-800/60">
                       <span className="flex items-center justify-center bg-[#f2ca50] text-[#1c1917] text-xs font-black rounded-full w-5 h-5 font-mono">1</span>
-                      <h3 className="text-xs sm:text-sm font-black text-white">첫 출발: 내 집 마련을 위한 총비용과 대출</h3>
+                      <h3 className="text-xs sm:text-sm font-black text-white">1단계: 부동산 매수</h3>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      첫 집을 사거나 투자할 때는 주택 매매대금뿐 아니라 세금과 부대비용을 포함한 전체 밑천이 필요합니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      화면의 첫 칸에 설정된 총 필요자금 <span className="text-[#f2ca50] font-black">{formatExactDraftWon(estimatedPrice)}</span>이 바로 이 집을 완전히 손에 쥐기까지 필요한 총금액입니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      이 중에서 대표님이 은행에서 빌리겠다고 처음 신청한 초기 대출금은 <span className="text-sky-400 font-black">{formatExactDraftWon(initialLoan)}</span>입니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      따라서 은행 대출금을 뺀 대표님의 순수한 비상금 등 진짜 주머니 사정은 내 현금 자력 실투자금 <span className="text-emerald-400 font-black">{formatExactDraftWon(myCash)}</span>이 됩니다.
-                    </p>
+                    <ul className="space-y-2">
+                      <li className="text-xs text-slate-300 leading-relaxed font-semibold">
+                        <span className="text-slate-400">• 총 필요자금: </span> 
+                        <span className="text-[#f2ca50] font-black">{formatExactDraftWon(estimatedPrice)}</span> (매매가 및 제반비용 포함)
+                      </li>
+                    </ul>
                   </motion.div>
 
-                  {/* 2. 세입자를 들여 월세를 만드는 계산법 */}
+                  {/* 2단계: 타인 자본(레버리지) 활용 */}
                   <motion.div 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -628,26 +547,27 @@ export default function MyPlanPortfolio({ isOpen, onClose, onShowToast }: MyPlan
                     <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-[#f2ca50]/5 to-transparent rounded-full pointer-events-none" />
                     <div className="flex items-center gap-2.5 pb-2 border-b border-zinc-800/60">
                       <span className="flex items-center justify-center bg-[#f2ca50] text-[#1c1917] text-xs font-black rounded-full w-5 h-5 font-mono">2</span>
-                      <h3 className="text-xs sm:text-sm font-black text-white">세입자를 들여 월세를 만드는 계산법</h3>
+                      <h3 className="text-xs sm:text-sm font-black text-white">2단계: 타인 자본(레버리지) 활용</h3>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      대표님이 주택 보유 기간 동안 매달 안정적인 소득인 월세 <span className="text-emerald-400 font-black">{formatExactDraftWon(targetRent)}</span>을 꼬박꼬박 수취하는 구조를 성립시키고자 합니다. 이때 전세계약을 반전세(월세계약)로 부분 전환하는 시장 합의 이율(시장 전월세 전환율)이 현재 연 <span className="text-[#f2ca50] font-black">{conversionRate.toFixed(1)}%</span>로 고정되어 있습니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      매달 대표님이 수령할 월세 수입 <span className="text-teal-400 font-black">{formatExactDraftWon(targetRent)}</span>(연간 환산 연세 수입 <span className="text-[#f2ca50] font-black">{formatExactDraftWon(targetRent * 12)}</span>)를 정상 획득하기 위해서는, 최초에 명시된 기본 기준 전세 시세(<span className="text-slate-300 font-bold">{formatExactDraftWon(marketJeonse)}</span>) 대비 보증금 감액을 수반해야 합니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      전환율 법정 산출식에 기초하여 매년 수령할 <span className="text-[#f2ca50] font-black">{formatExactDraftWon(targetRent * 12)}</span>의 가치만큼 보증금을 감액 공제해 보니, 정확히 <span className="text-sky-400 font-black">{formatExactDraftWon(decreasedDeposit)}</span>만큼의 전세금 가치가 월세 계약으로 대칭 치환됩니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      결과적으로, 원래 기본 시장 전세가 (<span className="text-slate-400">{formatExactDraftWon(marketJeonse)}</span>)에서 월세 계약으로 조대된 보증금 가비 가치공제액 (<span className="text-sky-400 font-semibold">{formatExactDraftWon(decreasedDeposit)}</span>)을 차감 정산한 최종 <span className="text-[#f2ca50] font-black underline decoration-wavy underline-offset-4">{formatExactDraftWon(depositValue)}</span>이 바로 실제 반전세 임차 세입자로부터 안전하게 건네받을 계약 보증금이 성립됩니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      즉, 세입자는 실제 보증금 <span className="text-[#f2ca50] font-black">{formatExactDraftWon(depositValue)}</span>에 추가적으로 매달 월세 <span className="text-emerald-400 font-black">{formatExactDraftWon(targetRent)}</span>을 부담하는 구조로 최종 입주가 이루어집니다.
-                    </p>
+                    <ul className="space-y-2">
+                      <li className="text-xs text-slate-300 leading-relaxed font-semibold">
+                        <span className="text-slate-400">• 주택담보대출: </span>
+                        <span className="text-sky-400 font-black">{formatExactDraftWon(initialLoan)}</span> 실행
+                        <div className="pl-3 text-[11px] text-slate-500 mt-0.5">(금리: {amortizationYears}년 만기 {interestRate.toFixed(1)}% 적용 기준)</div>
+                      </li>
+                      <li className="text-xs text-slate-300 leading-relaxed font-semibold">
+                        <span className="text-slate-400">• 세입자 보증금: </span>
+                        <span className="text-emerald-400 font-black">{formatExactDraftWon(depositValue)}</span> 확보
+                        <span className="text-slate-400"> (반전세: 보증금 {formatExactDraftWon(depositValue)} / 월세 {formatExactDraftWon(targetRent)})</span>
+                        <div className="pl-3 text-[11px] text-slate-500 mt-0.5">(현재 예상 전세가: {formatExactDraftWon(marketJeonse)} / 전환율 {conversionRate.toFixed(1)}% 적용)</div>
+                      </li>
+                      <li className="text-xs text-[#f2ca50] leading-relaxed font-bold border-t border-zinc-800 pt-2 mt-2">
+                        ▶ 타인 자본 합계: {formatExactDraftWon(initialLoan + depositValue)}
+                      </li>
+                    </ul>
                   </motion.div>
 
-                  {/* 3. 세입자의 보증금으로 대출금 갚기 */}
+                  {/* 3단계: 내 순수 투자금 */}
                   <motion.div 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -657,20 +577,14 @@ export default function MyPlanPortfolio({ isOpen, onClose, onShowToast }: MyPlan
                     <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-[#f2ca50]/5 to-transparent rounded-full pointer-events-none" />
                     <div className="flex items-center gap-2.5 pb-2 border-b border-zinc-800/60">
                       <span className="flex items-center justify-center bg-[#f2ca50] text-[#1c1917] text-xs font-black rounded-full w-5 h-5 font-mono">3</span>
-                      <h3 className="text-xs sm:text-sm font-black text-white">세입자의 보증금으로 대출금 갚기</h3>
+                      <h3 className="text-xs sm:text-sm font-black text-white">3단계: 내 순수 투자금</h3>
                     </div>
                     <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      세입자가 최종 입주하며 건넨 예상 계약 보증금 <span className="text-[#f2ca50] font-black">{formatExactDraftWon(depositValue)}</span>이 대표님 계좌에 수취되는 즉시, 대표님은 이 보증금 수령액 전액을 최초 실행했던 대출 원금(<span className="text-sky-400 font-semibold">{formatExactDraftWon(initialLoan)}</span>) 잔당을 직접 긴급 상환하여 지혜로운 현금흐름 다이어트를 이행합니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      그에 따라, 대표님이 앞으로 보유 기간 동안 실제 이자 및 상환 부담을 지고 갈 최종 실질 대출 잔당은 <span className="bg-sky-500/10 text-sky-400 font-black px-2 py-0.5 rounded border border-sky-500/20">최종 남은 대출금 {formatExactDraftWon(remainingLoan)}</span>으로 극소화 정비됩니다.
-                    </p>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-                      기존 은행 빚이 <span className="text-slate-400">{formatExactDraftWon(initialLoan)}</span>에서 불과 <span className="text-sky-400 font-bold">{formatExactDraftWon(remainingLoan)}</span> 수준으로 가볍게 경감되었으므로, 매월 은행에 갚아야 할 원금 및 이자 총 상환 비중(매월 원리금 분할 상환 평가액)도 엄청나게 절감되어 매달 약 <span className="text-red-400 font-black underline underline-offset-2">{formatExactDraftWon(monthlyAmortizationPayment)}</span>만 부담하면 충분해집니다.
+                      총 필요자금에서 대출과 보증금을 제외하고, 당장 내 주머니에서 꺼내야 할 실제 현금은 <span className="text-emerald-400 font-black">{formatExactDraftWon(myCash)}</span>입니다.
                     </p>
                   </motion.div>
 
-                  {/* 4. 내 지갑에 남는 최종 진짜 현금흐름 */}
+                  {/* 4단계: 매월 현금 흐름 */}
                   <motion.div 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -680,38 +594,42 @@ export default function MyPlanPortfolio({ isOpen, onClose, onShowToast }: MyPlan
                     <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-[#f2ca50]/5 to-transparent rounded-full pointer-events-none" />
                     <div className="flex items-center gap-2.5 pb-2 border-b border-zinc-800/60">
                       <span className="flex items-center justify-center bg-[#f2ca50] text-[#1c1917] text-xs font-black rounded-full w-5 h-5 font-mono">4</span>
-                      <h3 className="text-xs sm:text-sm font-black text-white">내 지갑에 남는 최종 진짜 현금흐름</h3>
+                      <h3 className="text-xs sm:text-sm font-black text-white">4단계: 매월 현금 흐름 (대출 상환 vs 월세 수익)</h3>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold font-bold">
-                      마지막으로 대표님의 매달 현금흐름 순수 수익 구조(Net Cash Flow Structure)를 면밀하게 대조해 확인해 보겠습니다.
-                    </p>
-                    
-                    <div className="bg-zinc-950 p-3.5 rounded-lg border border-zinc-800/80 space-y-2 max-w-md">
-                      <div className="flex justify-between items-center text-xs font-bold font-bold font-bold">
-                        <span className="text-slate-400 flex items-center gap-1.5 font-bold">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> 수입 금액 (임차 세입자 월세)
-                        </span>
-                        <span className="text-emerald-400 font-black">+{formatExactDraftWon(targetRent)}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs font-bold font-bold font-bold">
-                        <span className="text-slate-400 flex items-center gap-1.5 font-bold">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400" /> 비용 상환 (원리금 월 부담액)
-                        </span>
-                        <span className="text-red-400 font-black">-{formatExactDraftWon(monthlyAmortizationPayment)}</span>
-                      </div>
-                      <div className="h-px bg-zinc-800 my-1 font-bold font-bold font-bold" />
-                      <div className="flex justify-between items-center text-xs font-black text-white">
-                        <span>최종 실질 현금흐름 (순수 월 소득)</span>
-                        <span className={netCashFlow >= 0 ? "text-emerald-400 font-black text-sm" : "text-red-400 font-black text-sm"}>
-                          {netCashFlow >= 0 ? "+" : ""}{formatExactDraftWon(netCashFlow)} / 월
-                        </span>
-                      </div>
-                    </div>
+                    <ul className="space-y-2">
+                      <li className="text-xs text-slate-300 leading-relaxed font-semibold">
+                        <span className="text-slate-400">• 지출 (은행): </span>매월 원금과 이자로 약 <span className="text-red-400 font-black">{formatExactDraftWon(monthlyAmortizationPayment)}</span>을 상환합니다.
+                      </li>
+                      <li className="text-xs text-slate-300 leading-relaxed font-semibold">
+                        <span className="text-slate-400">• 수입 (세입자): </span>세입자로부터 매월 <span className="text-emerald-400 font-black">{formatExactDraftWon(targetRent)}</span>의 월세를 받습니다.
+                      </li>
+                      <li className="text-xs text-slate-300 leading-relaxed font-semibold border-t border-zinc-800 pt-2 mt-2">
+                        <span className="text-[#f2ca50] font-black">• 최종 흐름: </span>
+                        {netCashFlow >= 0 ? (
+                          <span>세입자에게 받는 월세만으로 대출 이자를 납부하고도, 매월 <span className="text-emerald-400 font-black">{formatExactDraftWon(netCashFlow)}</span>이 남습니다.</span>
+                        ) : (
+                          <span>월세 수입을 대출 이자에 보태어, 매월 <span className="text-red-400 font-black">{formatExactDraftWon(Math.abs(netCashFlow))}</span>의 현금을 추가로 부담합니다.</span>
+                        )}
+                      </li>
+                    </ul>
+                  </motion.div>
 
-                    <p className="text-xs text-slate-300 leading-relaxed font-semibold pt-1">
-                      이를 통해 계산 및 가치 평가해 본 대표님의 매달 최종 실질 현금흐름은 <span className={`font-black px-1.5 py-0.5 rounded-md ${
-                        netCashFlow >= 0 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-400/20" : "bg-red-500/10 text-red-400 border border-red-400/20"
-                      }`}>{formatExactDraftWon(netCashFlow)}</span>이 성립되어, 매월 안전하게 통장 배당금처럼 {netCashFlow >= 0 ? "순 입금 누적식 자산 자금으로 연금형태 소득이 실현됩니다" : "조달비용에 대한 자금 투하가 이루어지게 됩니다"}.
+                  {/* DB 저장 및 복사 버튼 */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.3 }}
+                    className="pt-4"
+                  >
+                    <button
+                      onClick={handleCopyStory}
+                      className="w-full bg-[#f2ca50] hover:bg-[#e4bc3c] text-zinc-950 font-black p-3.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 cursor-pointer shadow-md active:scale-95 duration-100"
+                    >
+                      <Sparkles className="w-5 h-5 text-zinc-950" />
+                      DB에 저장하기 및 복사
+                    </button>
+                    <p className="text-[10px] text-slate-500 font-bold text-center mt-2">
+                      버튼을 누르면 위 요약본이 클립보드에 복사되어 카톡이나 이메일에 쉽게 공유할 수 있습니다.
                     </p>
                   </motion.div>
                 </div>
